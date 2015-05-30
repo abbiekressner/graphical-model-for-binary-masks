@@ -2,6 +2,7 @@
 clear all
 
 % Load data
+error('You need to download the three OCR .data files from the Schmidt UGM website to see this example.');
 fprintf('Loading OCR data...\n');
 X = load('OCR_features.data');
 Y = load('OCR_labels.data');
