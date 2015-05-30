@@ -12,7 +12,7 @@ if nargin < 4
 end
 
 nNodes = int32(length(adj));
-[i j] = ind2sub([nNodes nNodes],find(adj));
+[i j] = find(adj);
 nEdges = length(i)/2;
 edgeEnds = zeros(nEdges,2,'int32');
 eNum = 0;
