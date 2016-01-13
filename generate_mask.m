@@ -23,7 +23,7 @@ function mask = generate_mask(ideal,params,verbose,accuracy,max_iter,lookup_tabl
 
   %% Organize inputs
   if nargin < 6 || isempty(lookup_table)
-    lookup_table = load('lookup_table.mat'); % XXX this might need fixing
+    lookup_table = load('example_lookup_table.mat');
   end 
   if nargin < 5
     max_iter = 50;

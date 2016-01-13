@@ -1,15 +1,19 @@
-function [gamma,model,example] = learn_parameters(ideal,nonideal,verbose,optimization)
+function [gamma,model,potentials_and_marginals] = learn_parameters(ideal,nonideal,verbose,optimization)
 
-  % function [gamma,model,example] = learn_parameters(ideal,nonideal,verbose,optimization)
+  % function [gamma,model,potentials_and_marginals] = ...
+  %   learn_parameters(ideal,nonideal,verbose,optimization)
   %
   % ideal: cell array containing ideal binary masks
   % nonideal: cell array containing corresponding non-ideal binary masks
   %
   % model: struct containing the model
-  % example: struct containing example node and edge potentials
+  % potentials_and_marginals: struct containing node and edge potentials
   %
-  % Hint: gamma (as defined in Kressner and Rozell, JASA, 20XX) can be seen
-  % along the diagonals in example.edgePot(:,:,1)
+  % Note: gamma (as defined in Kressner and Rozell, JASA, 2015) can be seen
+  % along the diagonals in potentials_and_marginals.edgePot(:,:,1). Also,
+  % by definition potentials_and_marginals.edgePot(:,:,1) is the same as
+  % potentials_and_marginals.edgePot(:,:,2) and as
+  % potentials_and_marginals.edgePot(:,:,3) and so on.
   %
   % See http://www.cs.ubc.ca/~schmidtm/Software/UGM/trainCRF.html and
   % http://www.cs.ubc.ca/~schmidtm/Software/UGM/trainMRF.html for guidance
@@ -157,7 +161,7 @@ if strcmp(optimization,'ml')
 elseif strcmp(optimization,'l2')
   % Options 2 // L2-regularized parameter estimation
   nParams = max([nodeMap(:);edgeMap(:)]);
-  lambda = 10*ones(nParams,1); % TODO what lambda values are appropriate?
+  lambda = 10*ones(nParams,1); % TODO which lambda values are best?
   lambda(1) = 0; % don't penalize bias
   regFunObj = @(w) penalizedL2(w,@UGM_CRF_NLL,lambda,Xnode,Xedge,... 
     labels,nodeMap,edgeMap,edgeStruct,@UGM_Infer_MeanField);
@@ -183,9 +187,10 @@ model.edgeStruct = edgeStruct;
 
 %% Make results readable
 if nargout > 0
-  [example.nodePot,example.edgePot] = UGM_CRF_makePotentials(w,...
-    Xnode,Xedge,nodeMap,edgeMap,edgeStruct);
-  [example.nodeMar,example.edgeMar] = UGM_Infer_MeanField(...
-    example.nodePot,example.edgePot,edgeStruct);
-  gamma = example.edgePot(1,1,1);  
+  [potentials_and_marginals.nodePot,potentials_and_marginals.edgePot] = ...
+    UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct);
+  [potentials_and_marginals.nodeMar,potentials_and_marginals.edgeMar] = ...
+    UGM_Infer_MeanField(potentials_and_marginals.nodePot,...
+    potentials_and_marginals.edgePot,edgeStruct);
+  gamma = potentials_and_marginals.edgePot(1,1,1);  
 end

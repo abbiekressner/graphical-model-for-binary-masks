@@ -2,7 +2,7 @@
 This toolbox provides a set of functions that implement the graphical model for binary masks presented in the following paper:
 
 ```
-Kressner, A. A. and Rozell, C. J. (2015). “Structure in time- frequency binary masking errors and its impact on speech intelligibility”, The Journal of the Acoustical Society of America 137, 2025–2035.
+Kressner, A. A. and Rozell, C. J. (2015). “Structure in time-frequency binary masking errors and its impact on speech intelligibility”, The Journal of the Acoustical Society of America 137, 2025–2035.
 ```
 
 The graphical model is a useful tool for 
@@ -13,7 +13,37 @@ The graphical model is a useful tool for
 This toolbox relies on the [Undirected Graphical Models toolbox](http://www.cs.ubc.ca/~schmidtm/Software/UGM.html) by Mark Schmidt. To ensure cohesion between versions of the toolbox, the UGM toolbox is wrapped into this one.
 
 ## Installation
-Download (using Git, SVN, or a zip file), open Matlab, and run `addpath(genpath('path/to/repo/'));`.
+Download (using Git, SVN, or a zip file), open Matlab, and run `addpath(genpath('path/to/repo/'));`, where you replace `'path/to/repo/'` with the actual path to where you have saved the files on your own computer (e.g., `'/Users/abbie/graphical-model-for-binary-masks/'`).
+
+## Getting started
+### Sampling
+Use the function `generate_mask` as follows to create a model-generated mask:
+```
+load('example_masks','mask_ideal');
+params.alpha = 0.2;
+params.beta = 0.1;
+params.gamma = 2.0;
+mask = generate_mask(mask_ideal{1},params);
+```
+This minimal working example uses the default for the `verbose`, `accuracy`, and `max_iter` settings. It also loads the default `example_lookup_table` for converting the `alpha` and `beta` to the weights `A` and `B` (for an explanation of these variables, see Kressner and Rozell, JASA, 2015, pg 2027). The mapping between `alpha` and `A` and `beta` and `B` is, in general, dependent on the speech corpus, noise type, signal-to-noise ratio (SNR), and clustering parameter `gamma`. Thus, to generate masks most efficiently, it is best to build a `lookup_table` specifically for each set of corpus, noise, SNR, local criterion threshold, filterbank, etc. and `gamma` combination using the included `build_lookup_table` function:
+```
+% Load an example IBM into the eg_ideal variable
+g = 1.0:0.5:2.5; % specify the gamma you are interested in using
+lookup_table_using_my_settings = build_lookup_table(eg_ideal,g);
+save('lookup_table_using_my_settings.mat','lookup_table_using_my_settings');
+```
+Then call `generate_mask` with this new `lookup_table`:
+```
+mask = generate_mask(eg_ideal,params,true,0.01,50,lookup_table_using_my_settings);
+```
+
+### Parameter estimation
+Use the function `learn_parameters` as follows:
+```
+load('example_masks');
+gamma = learn_parameters(mask_ideal,mask_gmm);
+```
+This minimal working example uses the default for the `verbose` and `optimization` settings. 
 
 ## License
 Written by Abigail Kressner in 2014.
@@ -37,5 +67,5 @@ along with GMBM.  If not, see <http://www.gnu.org/licenses/>.
 If you use this toolbox, please cite the following paper:
 
 ```
-Kressner, A. A. and Rozell, C. J. (2015). “Structure in time- frequency binary masking errors and its impact on speech intelligibility”, The Journal of the Acoustical Society of America 137, 2025–2035.
+Kressner, A. A. and Rozell, C. J. (2015). “Structure in time-frequency binary masking errors and its impact on speech intelligibility”, The Journal of the Acoustical Society of America 137, 2025–2035.
 ```
